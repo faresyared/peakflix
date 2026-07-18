@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineVerse - Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-black text-white font-['Inter'] antialiased">
+
+    <!-- Simple Dynamic Navbar -->
+    <header class="p-4 bg-gradient-to-b from-black to-transparent fixed top-0 left-0 right-0 z-50 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2 text-zinc-400 hover:text-orange-500 font-bold transition">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <span data-i18n="backToHome">Back to Home</span>
+        </a>
+    </header>
+
+    <!-- Player Main Area -->
+    <main class="h-screen w-screen flex flex-col justify-center items-center p-4 bg-zinc-950">
+        <div class="w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl relative group">
+            <!-- HTML5 Video Player -->
+            <video id="mainVideo" class="w-full h-full object-contain" controls controlsList="nodownload">
+                <!-- Source injected dynamically via JS -->
+            </video>
+        </div>
+        
+        <div class="max-w-5xl w-full mt-6 px-4">
+            <h1 id="videoTitle" class="text-3xl font-black tracking-tight text-white mb-2">Loading Title...</h1>
+            <p id="videoDesc" class="text-zinc-400 text-sm max-w-3xl leading-relaxed">Loading description...</p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Execution specialized for Player logic
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const item = contentData.find(c => c.id == id);
+
+            if (item) {
+                const currentLang = localStorage.getItem('siteLang') || 'en';
+                document.getElementById('videoTitle').innerText = currentLang === 'ar' ? item.titleAr : item.title;
+                document.getElementById('videoDesc').innerText = currentLang === 'ar' ? item.descAr : item.desc;
+                
+                const video = document.getElementById('mainVideo');
+                video.src = item.videoUrl;
+
+                // Load saved progress from Cache/LocalStorage if logged in
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                if (user) {
+                    const progressKey = `progress_${user.username}_${id}`;
+                    const savedTime = localStorage.getItem(progressKey);
+                    if (savedTime) {
+                        video.currentTime = parseFloat(savedTime);
+                    }
+
+                    // Save progress automatically during playback
+                    video.addEventListener('timeupdate', () => {
+                        if (video.currentTime > 5) { // start tracking after 5 seconds
+                            localStorage.setItem(progressKey, video.currentTime);
+                            updateContinueWatchingList(user.username, id, video.currentTime);
+                        }
+                    });
+                }
+            }
+            lucide.createIcons();
+        });
+
+        function updateContinueWatchingList(username, contentId, time) {
+            let list = JSON.parse(localStorage.getItem(`list_${username}`)) || [];
+            const index = list.findIndex(i => i.id == contentId);
+            if(index > -1) {
+                list[index].time = time;
+            } else {
+                list.push({ id: contentId, time: time });
+            }
+            localStorage.setItem(`list_${username}`, JSON.stringify(list));
+        }
+    </script>
+</body>
+</html>
