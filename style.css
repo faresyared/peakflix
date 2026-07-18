@@ -1,0 +1,30 @@
+/* Custom Scrollbar Hide for Clean Looks */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Custom RTL styling helper for dynamic borders */
+html[dir="rtl"] .setup-rtl-border {
+    border-left-width: 0px;
+    border-right-width: 4px;
+    padding-left: 0px;
+    padding-right: 12px;
+}
+
+/* Base interactive hover states */
+.active-nav {
+    color: #f97316 !important;
+    border-bottom: 2px solid #f97316;
+}
+
+/* Smooth zoom effect for Netflix style cards */
+.movie-card img {
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.movie-card:hover img {
+    transform: scale(1.08);
+}
